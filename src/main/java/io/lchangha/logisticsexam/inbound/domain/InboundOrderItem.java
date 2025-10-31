@@ -50,8 +50,4 @@ public class InboundOrderItem {
         DomainValidator.isTrue(unitPrice > 0, () -> new InvalidInboundOrderException("단가는 0보다 커야 합니다."));
     }
 
-    public void assignInboundOrder(InboundOrder inboundOrder) {
-        Objects.requireNonNull(inboundOrder, "입고 주문은 필수입니다.");
-        this.inboundOrder = inboundOrder;
-    }
 }

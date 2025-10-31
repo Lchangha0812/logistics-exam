@@ -4,6 +4,7 @@ import io.lchangha.logisticsexam.common.util.DomainValidator;
 import io.lchangha.logisticsexam.id.LocationId;
 import io.lchangha.logisticsexam.id.WarehouseId;
 import io.lchangha.logisticsexam.location.exception.InvalidLocationException;
+import io.lchangha.logisticsexam.warehouse.domain.Warehouse;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -54,8 +55,4 @@ public class Location {
         this.status = DomainValidator.requireNonNull(status, () -> new InvalidLocationException("로케이션 상태는 필수입니다."));
     }
 
-    public void updateStatus(LocationStatus newStatus) {
-        Objects.requireNonNull(newStatus, "새로운 로케이션 상태는 필수입니다.");
-        this.status = newStatus;
-    }
 }

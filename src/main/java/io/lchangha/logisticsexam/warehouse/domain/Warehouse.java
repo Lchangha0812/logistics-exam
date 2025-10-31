@@ -5,6 +5,7 @@ import io.lchangha.logisticsexam.common.domain.EmailAddress;
 import io.lchangha.logisticsexam.common.domain.PhoneNumber;
 import io.lchangha.logisticsexam.common.util.DomainValidator;
 import io.lchangha.logisticsexam.id.WarehouseId;
+import io.lchangha.logisticsexam.location.domain.Location;
 import io.lchangha.logisticsexam.warehouse.exception.InvalidWarehouseException;
 import lombok.AccessLevel;
 import lombok.Builder;
