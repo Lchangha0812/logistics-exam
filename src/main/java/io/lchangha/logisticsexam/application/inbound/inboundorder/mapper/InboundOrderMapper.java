@@ -1,9 +1,12 @@
 package io.lchangha.logisticsexam.application.inbound.inboundorder.mapper;
 
 import io.lchangha.logisticsexam.application.inbound.inboundorder.command.RegisterInboundOrderCommand;
+import io.lchangha.logisticsexam.application.inbound.inboundorder.command.RegisterItemCommand;
+import io.lchangha.logisticsexam.domain.LotNumber;
 import io.lchangha.logisticsexam.domain.Quantity;
 import io.lchangha.logisticsexam.domain.inbound.inboundorder.*;
-import io.lchangha.logisticsexam.domain.inbound.inboundorder.params.RegistrationInfo;
+import io.lchangha.logisticsexam.domain.inbound.inboundorder.params.RegistrationParam;
+import io.lchangha.logisticsexam.domain.inbound.inboundorder.vo.*;
 import io.lchangha.logisticsexam.domain.masterdata.partner.UnitOfMeasure;
 import io.lchangha.logisticsexam.domain.masterdata.product.ProductId;
 import org.mapstruct.Mapper;
@@ -12,9 +15,9 @@ import org.mapstruct.Mapper;
 @Mapper
 public abstract class InboundOrderMapper {
 
-    public abstract RegistrationInfo toRegistrationInfo(RegisterInboundOrderCommand command);
+    public abstract RegistrationParam toRegistrationParam(RegisterInboundOrderCommand command);
 
-    public abstract RegistrationInfo.RegisterItem toRegisterItem(RegisterInboundOrderCommand.RegisterItem item);
+    public abstract RegisterItemCommand toRegisterItemCommand(RegisterItemCommand item);
 
     protected ReferenceCode toReferenceCode(RegisterInboundOrderCommand command) {
         if (command == null || command.referenceType() == null || command.referenceValue() == null) {
@@ -26,7 +29,6 @@ public abstract class InboundOrderMapper {
 
         return switch (type) {
             case STANDARD_PURCHASE -> new PurchaseOrderCode(value);
-            case RETURN -> new RmaCode(value);
             case WAREHOUSE_TRANSFER -> new TransferOrderCode(value);
         };
     }
@@ -48,5 +50,9 @@ public abstract class InboundOrderMapper {
 
     protected ProductId toProductId(Long id) {
         return new ProductId(id);
+    }
+
+    protected LotNumber toLotNumber(String lotNumber) {
+        return new LotNumber(lotNumber);
     }
 }

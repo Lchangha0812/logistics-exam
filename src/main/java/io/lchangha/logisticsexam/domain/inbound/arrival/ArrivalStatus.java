@@ -1,5 +1,8 @@
 package io.lchangha.logisticsexam.domain.inbound.arrival;
 
+import lombok.Getter;
+
+@Getter
 public enum ArrivalStatus {
     COMPLETED("입하 완료"); // 입하 이벤트가 기록되고 완료되었음을 의미
 
@@ -9,7 +12,4 @@ public enum ArrivalStatus {
         this.description = description;
     }
 
-    public String getDescription() {
-        return description;
-    }
 }

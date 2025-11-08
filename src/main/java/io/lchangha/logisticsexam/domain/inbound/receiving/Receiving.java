@@ -1,10 +1,15 @@
 package io.lchangha.logisticsexam.domain.inbound.receiving;
 
+import io.lchangha.logisticsexam.domain.inbound.receiving.contract.ReceivingIdGenerator;
+import io.lchangha.logisticsexam.application.inbound.receiving.RecordPutawayCommand;
 import io.lchangha.logisticsexam.domain.DomainValidator;
+import io.lchangha.logisticsexam.domain.Quantity;
 import io.lchangha.logisticsexam.domain.WarehouseId;
 import io.lchangha.logisticsexam.domain.inbound.arrival.Arrival;
-import io.lchangha.logisticsexam.domain.inbound.arrival.ArrivalId;
-import io.lchangha.logisticsexam.domain.inbound.exception.InvalidReceivingException;
+import io.lchangha.logisticsexam.domain.inbound.arrival.vo.ArrivalId;
+import io.lchangha.logisticsexam.domain.inbound.arrival.ArrivalItem;
+import io.lchangha.logisticsexam.domain.inbound.receiving.vo.ReceivingId;
+import io.lchangha.logisticsexam.domain.masterdata.location.vo.LocationId;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -15,12 +20,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
- * {@code Receiving} 애그리거트 루트는 WMS(창고 관리 시스템)에서 상품의 최종 입고 및 적치 과정을 나타냅니다.
+ * {@code Receiving}  상품의 최종 입고 및 적치 과정을 나타냅니다.
  * 이는 {@link Arrival}을 통해 도착한 상품이 실제 창고의 특정 로케이션에 할당되고 재고로 반영되는 흐름을 관리합니다.
  *
- * 이 애그리거트는 다음과 같은 핵심 역할을 수행합니다:
  * <ul>
  *     <li>**입고 식별:** {@link ReceivingId}를 통해 시스템 내에서 고유하게 식별됩니다.</li>
  *     <li>**입하 참조:** {@link ArrivalId}를 참조하여 어떤 입하에 대한 입고인지 연결됩니다.</li>
@@ -30,7 +37,7 @@ import java.util.List;
  * </ul>
  *
  * {@code Receiving}은 {@code Arrival} 이후의 단계로, 상품의 물리적 흐름을 완료하고 재고 시스템에 반영하는 최종 단계를 책임집니다.
- * {@link ReceivingItem}은 {@code Receiving} 애그리거트의 일부로서 {@code Receiving}의 생명 주기에 종속됩니다.
+ * {@link ReceivingItem}은 {@code Receiving}의 일부로서 {@code Receiving}의 생명 주기에 종속됩니다.
  */
 @Getter
 @ToString
@@ -42,6 +49,14 @@ public class Receiving {
     private final WarehouseId warehouseId;
     private ReceivingStatus status;
     private final List<ReceivingItem> receivingItems = new ArrayList<>();
+
+    @Builder
+    public record PutawayParams(
+            Arrival arrival,
+            WarehouseId warehouseId,
+            List<RecordPutawayCommand.PutawayDetail> putawayDetails
+    ) {
+    }
 
     @Builder(access = AccessLevel.PACKAGE)
     private Receiving(
@@ -57,6 +72,53 @@ public class Receiving {
         DomainValidator.requireNonEmpty(receivingItems, () -> new InvalidReceivingException("입고 상품은 필수입니다."));
         receivingItems.forEach(this::addReceivingItem);
         this.status = ReceivingStatus.PENDING_PUTAWAY; // 초기 상태는 적치 대기
+    }
+
+    public static Receiving putawayFrom(
+            PutawayParams params,
+            ReceivingIdGenerator receivingIdGenerator) {
+
+        Map<Long, ArrivalItem> arrivalItemMap = params.arrival().getArrivalItems().stream()
+                .collect(Collectors.toMap(item -> item.getId().value(), Function.identity()));
+
+        for (RecordPutawayCommand.PutawayDetail detail : params.putawayDetails()) {
+            ArrivalItem arrivalItem = arrivalItemMap.get(detail.arrivalItemId());
+            if (isNonExistentArrivalItem(arrivalItem)) {
+                throw new InvalidReceivingException("도착하지 않은 품목을 적치할 수 없습니다.");
+            }
+            if (isOverQuantityToPutaway(detail, arrivalItem)) {
+                throw new InvalidReceivingException("도착 수량보다 많이 적치할 수 없습니다.");
+            }
+        }
+
+        List<ReceivingItem> receivingItems = params.putawayDetails().stream()
+                .map(detail -> {
+                    ArrivalItem arrivalItem = arrivalItemMap.get(detail.arrivalItemId());
+                    return ReceivingItem.builder()
+                            .id(receivingIdGenerator.generateItemId())
+                            .productId(arrivalItem.getProductId())
+                            .receivedQuantity(new Quantity(detail.quantity(), arrivalItem.getArrivedQuantity().unit()))
+                            .locationId(new LocationId(detail.locationId()))
+                            .lotNumber(arrivalItem.getLotNumber())
+                            .build();
+                })
+                .toList();
+
+        return Receiving.builder()
+                .id(receivingIdGenerator.generateId())
+                .arrivalId(params.arrival().getId())
+                .receivingDate(LocalDateTime.now())
+                .warehouseId(params.warehouseId())
+                .receivingItems(receivingItems)
+                .build();
+    }
+
+    private static boolean isNonExistentArrivalItem(ArrivalItem arrivalItem) {
+        return arrivalItem == null;
+    }
+
+    private static boolean isOverQuantityToPutaway(RecordPutawayCommand.PutawayDetail detail, ArrivalItem arrivalItem) {
+        return detail.quantity() > arrivalItem.getArrivedQuantity().amount();
     }
 
     public List<ReceivingItem> getReceivingItems() {

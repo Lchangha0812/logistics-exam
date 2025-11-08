@@ -1,9 +1,10 @@
 package io.lchangha.logisticsexam.domain.inbound.inboundorder;
 
 import io.lchangha.logisticsexam.domain.DomainValidator;
-import io.lchangha.logisticsexam.domain.inbound.exception.InvalidInboundOrderException;
-import io.lchangha.logisticsexam.domain.inbound.inboundorder.params.RegistrationInfo;
-import io.lchangha.logisticsexam.domain.inbound.record.InboundRecord;
+import io.lchangha.logisticsexam.domain.inbound.inboundorder.contract.InboundOrderIdGenerator;
+import io.lchangha.logisticsexam.domain.inbound.inboundorder.params.RegisterItemParam;
+import io.lchangha.logisticsexam.domain.inbound.inboundorder.params.RegistrationParam;
+import io.lchangha.logisticsexam.domain.inbound.inboundorder.vo.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -14,13 +15,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
 
 /**
- * {@code InboundOrder} 애그리거트 루트는 WMS(창고 관리 시스템)로 들어올 상품에 대한 계획된 주문 정보를 나타냅니다.
- * 이는 외부 시스템(예: ERP)으로부터 수신되거나 수동으로 생성될 수 있으며, 입고 프로세스의 시작점 역할을 합니다.
+ * {@code InboundOrder} 는 들어올 상품에 대한 계획된 주문 정보를 나타내며 입하 이전 사전 준비를 포함합니다.
+ * 이는 외부 시스템으로부터 수신되거나 수동으로 생성될 수 있으며, 입고 프로세스의 시작점 역할을 합니다.
  *
- * 이 애그리거트는 다음과 같은 핵심 역할을 수행합니다:
  * <ul>
  *     <li>**주문 식별:** {@link InboundOrderId}를 통해 시스템 내에서 고유하게 식별됩니다.</li>
  *     <li>**참조 코드:** {@link ReferenceCode}를 통해 입고 유형별(구매, 반품, 이동 등) 참조 코드를 다형적으로 관리합니다.</li>
@@ -29,7 +28,7 @@ import java.util.stream.IntStream;
  *     <li>**상태 관리:** {@link InboundOrderStatus}를 통해 주문의 현재 상태(예: 요청됨, 승인됨, 완료됨 등)를 추적합니다.</li>
  * </ul>
  *
- * {@code InboundOrder}는 입고 프로세스의 첫 번째 단계로, 이후 {@code Arrival} 및 {@code Receiving} 애그리거트와 연동되어
+ * {@code InboundOrder}는 입고 프로세스의 첫 번째 단계로, 이후 {@code Arrival} 및 {@code Receiving} 와 연동되어
  * 실제 상품의 입고 및 적치 과정을 관리합니다.
  */
 @Getter
@@ -66,26 +65,19 @@ public class InboundOrder {
         this.status = inboundOrderStatus;
     }
 
-    public static InboundOrder register(InboundOrderId inboundOrderId, List<InboundOrderItemId> itemIds, RegistrationInfo info) {
-        DomainValidator.isTrue(itemIds.size() == info.items().size(),
-                () -> new InvalidInboundOrderException("입고 품목 ID의 개수가 품목 정보의 개수와 일치하지 않습니다."));
-
-        List<InboundOrderItem> newItems = new ArrayList<>();
-        for (int i = 0; i < itemIds.size(); i++) {
-            RegistrationInfo.RegisterItem currentRegisterItem = info.items().get(i);
-            InboundOrderItemId currentItemId = itemIds.get(i);
-
-            InboundOrderItem newItem = InboundOrderItem.builder()
-                    .id(currentItemId)
-                    .productId(currentRegisterItem.productId())
-                    .orderQuantity(currentRegisterItem.quantity())
-                    .unitPrice(currentRegisterItem.unitPrice())
-                    .build();
-            newItems.add(newItem);
-        }
+    public static InboundOrder register(RegistrationParam info, InboundOrderIdGenerator idGenerator) {
+        List<InboundOrderItem> newItems = info.items().stream()
+                .map(itemParam -> InboundOrderItem.builder()
+                        .id(idGenerator.generateItemId())
+                        .productId(itemParam.productId())
+                        .orderQuantity(itemParam.quantity())
+                        .unitPrice(itemParam.unitPrice())
+                        .lotNumber(itemParam.lotNumber())
+                        .build())
+                .toList();
 
         return InboundOrder.builder()
-                .id(inboundOrderId)
+                .id(idGenerator.generateId())
                 .referenceCode(info.referenceCode())
                 .title(info.title())
                 .description(info.description())
@@ -127,29 +119,6 @@ public class InboundOrder {
         this.status = InboundOrderStatus.CANCELLED;
     }
 
-    // 사전 준비 유스케이스 메서드들
+    // TODO: 사전 준비 유스케이스 메서드들
 
-    public void planPutawayLocations() {
-        // TODO: [사전준비] 최적 보관 위치 선정 (Put-away Planning) 유스케이스 구현 필요.
-    }
-
-    public void planLaborAndEquipment() {
-        // TODO: [사전준비] 작업자 및 장비 배치 (Labor Planning) 유스케이스 구현 필요.
-    }
-
-    public void identifyCrossDockingOpportunities() {
-        // TODO: [사전준비] 크로스도킹 기회 식별 (Cross-Docking) 유스케이스 구현 필요.
-    }
-
-    /**
-     * 모든 입고 기록을 바탕으로 이 주문을 최종 마감합니다.
-     *
-     * @param records 이 주문과 관련된 모든 InboundRecord 목록
-     */
-    public void close(List<InboundRecord> records) {
-        if (this.status != InboundOrderStatus.CONFIRMED) {
-            throw new InvalidInboundOrderException("확정된 주문만 마감할 수 있습니다.");
-        }
-        //TODO: 추가 구현 필요
-    }
 }

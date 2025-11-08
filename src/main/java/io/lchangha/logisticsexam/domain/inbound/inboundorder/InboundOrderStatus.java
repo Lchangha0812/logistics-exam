@@ -9,7 +9,7 @@ public enum InboundOrderStatus {
 
     private final String description;
 
-    InboundOrderStatus(final String description) {
+    InboundOrderStatus(String description) {
         this.description = description;
     }
 

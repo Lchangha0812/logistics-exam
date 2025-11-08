@@ -1,11 +1,11 @@
 package io.lchangha.logisticsexam.application.inbound.inboundorder.command;
 
-import io.lchangha.logisticsexam.domain.inbound.inboundorder.InboundOrderType; // Import added
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-
+@Builder
 public record RegisterInboundOrderCommand(
         String referenceValue,
         String referenceType,
@@ -13,13 +13,7 @@ public record RegisterInboundOrderCommand(
         String description,
         LocalDateTime orderRequestedAt,
         LocalDateTime expectedArrivalAt,
-        List<RegisterItem> items
+        List<RegisterItemCommand> items
 ) {
-    public record RegisterItem(
-            Long productId,
-            Long amount,
-            String unit,
-            Long unitPrice
-    ) {
-    }
+
 }

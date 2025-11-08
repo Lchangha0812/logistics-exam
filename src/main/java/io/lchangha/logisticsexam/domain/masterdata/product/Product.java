@@ -1,6 +1,6 @@
 package io.lchangha.logisticsexam.domain.masterdata.product;
 
-import io.lchangha.logisticsexam.domain.masterdata.partner.PartnerId;
+import io.lchangha.logisticsexam.domain.masterdata.partner.vo.PartnerId;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -10,10 +10,9 @@ import lombok.ToString;
 import java.util.Objects;
 
 /**
- * {@code Product} 애그리거트 루트는 WMS(창고 관리 시스템)에서 관리되는 모든 상품의 마스터 데이터를 정의합니다.
+ * {@code Product} 는 관리되는 모든 상품의 마스터 데이터를 정의합니다.
  * 상품은 창고에 입고, 보관, 출고되는 모든 물리적 품목의 고유한 특성과 정책을 나타냅니다.
  *
- * 이 애그리거트는 다음과 같은 핵심 역할을 수행합니다:
  * <ul>
  *     <li>**상품 식별:** {@link ProductId}를 통해 시스템 내에서 고유하게 식별됩니다.</li>
  *     <li>**기본 정보 정의:** 상품명, 상품 코드, 설명 등 기본적인 식별 정보를 제공합니다.</li>
@@ -24,7 +23,6 @@ import java.util.Objects;
  *     <li>**재고 관리 정책:** 유효기간 필요 여부({@code requiresExpirationDate}), 유효기간 일수({@code expirationPeriodDays}), 재주문 시점({@code reorderPoint}), 최대 재고 수량({@code maxStockLevel}) 등 재고 운영에 필요한 정책을 포함합니다.</li>
  * </ul>
  *
- * 상품의 핵심 속성 변경은 이 애그리거트 내에서만 이루어져 데이터 일관성을 보장합니다.
  */
 @Getter
 @ToString

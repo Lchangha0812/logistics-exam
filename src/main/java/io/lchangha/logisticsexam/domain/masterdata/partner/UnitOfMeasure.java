@@ -4,10 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum UnitOfMeasure {
-    EA("개"), // Each
-    BOX("박스"), // Box
-    PALLET("팔레트"), // Pallet
-    KILOGRAM("킬로그램"); // Kilogram
+    EA("개"),
+    BOX("박스"),
+    PALLET("팔레트"),
+    KILOGRAM("킬로그램");
 
     private final String description;
 

@@ -2,6 +2,7 @@ package io.lchangha.logisticsexam.domain.masterdata.partner;
 
 import io.lchangha.logisticsexam.domain.DomainValidator;
 import io.lchangha.logisticsexam.domain.masterdata.partner.exception.InvalidPartnerException;
+import io.lchangha.logisticsexam.domain.masterdata.partner.vo.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -9,7 +10,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 /**
- * 파트너 애그리거트 루트 (공급업체, 제조업체, 고객, 운송사 등)
+ * 파트너 (공급업체, 제조업체, 고객, 운송사 등)
  */
 @Getter
 @ToString

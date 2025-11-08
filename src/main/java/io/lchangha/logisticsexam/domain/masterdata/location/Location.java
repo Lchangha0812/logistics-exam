@@ -3,6 +3,9 @@ package io.lchangha.logisticsexam.domain.masterdata.location;
 import io.lchangha.logisticsexam.domain.DomainValidator;
 import io.lchangha.logisticsexam.domain.WarehouseId;
 import io.lchangha.logisticsexam.domain.masterdata.location.exception.InvalidLocationException;
+import io.lchangha.logisticsexam.domain.masterdata.location.vo.LocationCapacity;
+import io.lchangha.logisticsexam.domain.masterdata.location.vo.LocationCode;
+import io.lchangha.logisticsexam.domain.masterdata.location.vo.LocationId;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -10,10 +13,9 @@ import lombok.Getter;
 import lombok.ToString;
 
 /**
- * {@code Location} 애그리거트 루트는 WMS(창고 관리 시스템)에서 상품이 실제로 보관되는 물리적인 위치를 정의합니다.
+ * {@code Location} 는 상품이 실제로 보관되는 물리적인 위치를 정의합니다.
  * 각 로케이션은 특정 창고 내의 고유한 저장 공간을 나타내며, 상품의 정확한 위치 관리를 가능하게 합니다.
  *
- * 이 애그리거트는 다음과 같은 핵심 역할을 수행합니다:
  * <ul>
  *     <li>**로케이션 식별:** {@link LocationId}를 통해 시스템 내에서 고유하게 식별됩니다.</li>
  *     <li>**창고 참조:** {@link WarehouseId}를 통해 어떤 창고에 속하는 로케이션인지 연결됩니다.</li>
