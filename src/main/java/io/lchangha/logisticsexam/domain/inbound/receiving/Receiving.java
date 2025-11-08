@@ -1,15 +1,12 @@
 package io.lchangha.logisticsexam.domain.inbound.receiving;
 
 import io.lchangha.logisticsexam.domain.inbound.receiving.contract.ReceivingIdGenerator;
-import io.lchangha.logisticsexam.application.inbound.receiving.RecordPutawayCommand;
 import io.lchangha.logisticsexam.domain.DomainValidator;
-import io.lchangha.logisticsexam.domain.Quantity;
 import io.lchangha.logisticsexam.domain.WarehouseId;
 import io.lchangha.logisticsexam.domain.inbound.arrival.Arrival;
 import io.lchangha.logisticsexam.domain.inbound.arrival.vo.ArrivalId;
-import io.lchangha.logisticsexam.domain.inbound.arrival.ArrivalItem;
+import io.lchangha.logisticsexam.domain.inbound.receiving.params.RecordReceivingParam;
 import io.lchangha.logisticsexam.domain.inbound.receiving.vo.ReceivingId;
-import io.lchangha.logisticsexam.domain.masterdata.location.vo.LocationId;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -21,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -46,79 +42,46 @@ public class Receiving {
     private ReceivingId id;
     private final ArrivalId arrivalId;
     private final LocalDateTime receivingDate;
-    private final WarehouseId warehouseId;
     private ReceivingStatus status;
     private final List<ReceivingItem> receivingItems = new ArrayList<>();
-
-    @Builder
-    public record PutawayParams(
-            Arrival arrival,
-            WarehouseId warehouseId,
-            List<RecordPutawayCommand.PutawayDetail> putawayDetails
-    ) {
-    }
 
     @Builder(access = AccessLevel.PACKAGE)
     private Receiving(
             ReceivingId id,
             ArrivalId arrivalId,
             LocalDateTime receivingDate,
-            WarehouseId warehouseId,
             List<ReceivingItem> receivingItems) {
         this.id = id;
         this.arrivalId = DomainValidator.requireNonNull(arrivalId, () -> new InvalidReceivingException("입하 ID는 필수입니다."));
         this.receivingDate = DomainValidator.requireNonNull(receivingDate, () -> new InvalidReceivingException("입고 날짜는 필수입니다."));
-        this.warehouseId = DomainValidator.requireNonNull(warehouseId, () -> new InvalidReceivingException("창고 ID는 필수입니다."));
         DomainValidator.requireNonEmpty(receivingItems, () -> new InvalidReceivingException("입고 상품은 필수입니다."));
         receivingItems.forEach(this::addReceivingItem);
-        this.status = ReceivingStatus.PENDING_PUTAWAY; // 초기 상태는 적치 대기
+        this.status = ReceivingStatus.PUTAWAY_COMPLETED; // 초기 상태는 적치 완료
     }
 
-    public static Receiving putawayFrom(
-            PutawayParams params,
+    public static Receiving record(
+            RecordReceivingParam params,
             ReceivingIdGenerator receivingIdGenerator) {
 
-        Map<Long, ArrivalItem> arrivalItemMap = params.arrival().getArrivalItems().stream()
-                .collect(Collectors.toMap(item -> item.getId().value(), Function.identity()));
+        DomainValidator.requireNonNull(params.arrivalId(), () -> new InvalidReceivingException("입하 ID는 필수입니다."));
+        DomainValidator.requireNonEmpty(params.itemsToReceive(), () -> new InvalidReceivingException("입고할 상품 목록은 필수입니다."));
 
-        for (RecordPutawayCommand.PutawayDetail detail : params.putawayDetails()) {
-            ArrivalItem arrivalItem = arrivalItemMap.get(detail.arrivalItemId());
-            if (isNonExistentArrivalItem(arrivalItem)) {
-                throw new InvalidReceivingException("도착하지 않은 품목을 적치할 수 없습니다.");
-            }
-            if (isOverQuantityToPutaway(detail, arrivalItem)) {
-                throw new InvalidReceivingException("도착 수량보다 많이 적치할 수 없습니다.");
-            }
-        }
-
-        List<ReceivingItem> receivingItems = params.putawayDetails().stream()
-                .map(detail -> {
-                    ArrivalItem arrivalItem = arrivalItemMap.get(detail.arrivalItemId());
-                    return ReceivingItem.builder()
-                            .id(receivingIdGenerator.generateItemId())
-                            .productId(arrivalItem.getProductId())
-                            .receivedQuantity(new Quantity(detail.quantity(), arrivalItem.getArrivedQuantity().unit()))
-                            .locationId(new LocationId(detail.locationId()))
-                            .lotNumber(arrivalItem.getLotNumber())
-                            .build();
-                })
+        List<ReceivingItem> receivingItems = params.itemsToReceive().stream()
+                .map(item -> ReceivingItem.builder()
+                        .id(receivingIdGenerator.generateItemId())
+                        .productId(item.productId())
+                        .receivedQuantity(item.arrivedQuantity())
+                        .lotNumber(item.lotNumber())
+                        .locationId(item.locationId())
+                        .build())
                 .toList();
 
         return Receiving.builder()
                 .id(receivingIdGenerator.generateId())
-                .arrivalId(params.arrival().getId())
-                .receivingDate(LocalDateTime.now())
-                .warehouseId(params.warehouseId())
+                .arrivalId(params.arrivalId())
+                .receivingDate(params.receivingDate())
                 .receivingItems(receivingItems)
                 .build();
-    }
-
-    private static boolean isNonExistentArrivalItem(ArrivalItem arrivalItem) {
-        return arrivalItem == null;
-    }
-
-    private static boolean isOverQuantityToPutaway(RecordPutawayCommand.PutawayDetail detail, ArrivalItem arrivalItem) {
-        return detail.quantity() > arrivalItem.getArrivedQuantity().amount();
     }
 
     public List<ReceivingItem> getReceivingItems() {
@@ -128,18 +91,6 @@ public class Receiving {
     private void addReceivingItem(ReceivingItem item) {
         this.receivingItems.add(item);
         item.assignReceiving(this);
-    }
-
-    /**
-     * 모든 상품의 적치가 완료되었음을 시스템에 기록합니다.
-     *
-     * @throws InvalidReceivingException 적치 대기 상태가 아닐 경우
-     */
-    public void completePutAway() {
-        if (status != ReceivingStatus.PENDING_PUTAWAY) {
-            throw new InvalidReceivingException("적치 대기 상태에서만 적치를 완료할 수 있습니다.");
-        }
-        status = ReceivingStatus.PUTAWAY_COMPLETED;
     }
 
     /**

@@ -1,6 +1,7 @@
 package io.lchangha.logisticsexam.domain.inbound.receiving;
 
 import io.lchangha.logisticsexam.domain.DomainValidator;
+import io.lchangha.logisticsexam.domain.LotNumber;
 import io.lchangha.logisticsexam.domain.Quantity;
 import io.lchangha.logisticsexam.domain.inbound.receiving.vo.ReceivingItemId;
 import io.lchangha.logisticsexam.domain.masterdata.location.vo.LocationId;

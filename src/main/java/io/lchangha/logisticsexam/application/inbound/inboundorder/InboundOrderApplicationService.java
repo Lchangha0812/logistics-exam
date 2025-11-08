@@ -45,7 +45,7 @@ public class InboundOrderApplicationService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 입고 지시를 찾을 수 없습니다. ID: " + command.inboundOrderId().value()));
 
         // TODO: InboundOrder 도메인 객체에 보관 위치 기록 로직 추가 필요
-        // inboundOrder.recordPutawayLocations(command.putawayDetails());
+        // inboundOrder.recordPutawayLocations(command.putawayDetailCommands());
 
         repository.save(inboundOrder);
     }
