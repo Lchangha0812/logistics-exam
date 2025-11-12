@@ -25,7 +25,11 @@ repositories {
 }
 
 dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
+    runtimeOnly("com.h2database:h2")
 
     // mapstruct
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
@@ -35,6 +39,8 @@ dependencies {
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+    annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

@@ -1,6 +1,6 @@
 package io.lchangha.logisticsexam.masterdata.domain.vo;
 
-public enum Category {
+public enum ItemCategory {
     PRODUCE,      // 농산물
     MEAT_POULTRY, // 정육/가금류
     SEAFOOD,      // 수산물
