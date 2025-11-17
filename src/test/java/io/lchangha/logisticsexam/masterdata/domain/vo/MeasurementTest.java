@@ -1,5 +1,7 @@
 package io.lchangha.logisticsexam.masterdata.domain.vo;
 
+import io.lchangha.logisticsexam.masterdata.item.domain.vo.Measurement;
+import io.lchangha.logisticsexam.masterdata.item.domain.vo.Uom;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

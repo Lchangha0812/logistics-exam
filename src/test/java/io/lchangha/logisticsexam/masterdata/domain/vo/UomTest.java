@@ -1,5 +1,6 @@
 package io.lchangha.logisticsexam.masterdata.domain.vo;
 
+import io.lchangha.logisticsexam.masterdata.item.domain.vo.Uom;
 import org.junit.jupiter.api.DisplayName; // DisplayName은 더 이상 사용하지 않지만, 혹시 몰라 남겨둡니다.
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

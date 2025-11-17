@@ -1,0 +1,55 @@
+package io.lchangha.logisticsexam.masterdata.supplier.web;
+
+import io.lchangha.logisticsexam.masterdata.supplier.domain.Supplier;
+import io.lchangha.logisticsexam.masterdata.supplier.web.dto.CreateSupplierRequest;
+import io.lchangha.logisticsexam.masterdata.supplier.web.dto.SupplierResponse;
+import io.lchangha.logisticsexam.masterdata.supplier.web.dto.UpdateSupplierRequest;
+import io.lchangha.logisticsexam.shared.domain.AuditInfo;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
+
+@Mapper(componentModel = "spring")
+public interface SupplierDtoMapper {
+
+    @Mappings({
+            @Mapping(source = "auditInfo.createdAt", target = "createdAt"),
+            @Mapping(source = "auditInfo.createdBy", target = "createdBy"),
+            @Mapping(source = "auditInfo.lastModifiedAt", target = "lastModifiedAt"),
+            @Mapping(source = "auditInfo.lastModifiedBy", target = "lastModifiedBy"),
+            @Mapping(source = "status", target = "status")
+    })
+    SupplierResponse toResponse(Supplier supplier);
+
+    default Supplier toDomain(CreateSupplierRequest request, Long newId, String creator) {
+        return Supplier.builder()
+                .id(newId)
+                .name(request.name())
+                .leadTimeDays(request.leadTimeDays())
+                .status(Supplier.Status.valueOf(request.status().toUpperCase()))
+                .address(request.address())
+                .phoneNumber(request.phoneNumber())
+                .email(request.email())
+                .contactPersonName(request.contactPersonName())
+                .businessRegistrationNumber(request.businessRegistrationNumber())
+                .paymentTerms(request.paymentTerms())
+                .auditInfo(AuditInfo.forCreation(creator))
+                .build();
+    }
+
+    default Supplier toDomain(UpdateSupplierRequest request, Supplier existingSupplier, String updater) {
+        return Supplier.builder()
+                .id(existingSupplier.getId())
+                .name(request.name())
+                .leadTimeDays(request.leadTimeDays())
+                .status(Supplier.Status.valueOf(request.status().toUpperCase()))
+                .address(request.address())
+                .phoneNumber(request.phoneNumber())
+                .email(request.email())
+                .contactPersonName(request.contactPersonName())
+                .businessRegistrationNumber(request.businessRegistrationNumber())
+                .paymentTerms(request.paymentTerms())
+                .auditInfo(existingSupplier.getAuditInfo().forUpdate(updater))
+                .build();
+    }
+}

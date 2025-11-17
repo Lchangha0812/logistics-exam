@@ -1,0 +1,70 @@
+package io.lchangha.logisticsexam.masterdata.item.infra;
+
+import io.lchangha.logisticsexam.masterdata.item.domain.Item;
+import io.lchangha.logisticsexam.masterdata.item.infra.entity.ItemEntity;
+import io.lchangha.logisticsexam.masterdata.item.domain.vo.*;
+import io.lchangha.logisticsexam.masterdata.vo.TemperatureZone;
+import io.lchangha.logisticsexam.shared.domain.AuditInfo;
+import org.springframework.stereotype.Component;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@Component
+public class ItemEntityMapper {
+
+    public Item toDomain(ItemEntity entity) {
+        return Item.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .sku(new SKU(entity.getSkuCode()))
+                .barcode(new Barcode(entity.getBarcode()))
+                .baseUom(Uom.of(entity.getBaseUom()))
+                .itemCategory(ItemCategory.valueOf(entity.getItemCategory().toUpperCase()))
+                .temperatureZone(TemperatureZone.valueOf(entity.getTemperatureZone().toUpperCase()))
+                .requiresExpiry(entity.isRequiresExpiry())
+                .safetyStock(entity.getSafetyStock())
+                .active(entity.isActive())
+                .uomConversionProfile(mapUomConversionProfile(entity))
+                .auditInfo(new AuditInfo(
+                        entity.getCreatedAt(),
+                        entity.getCreatedBy(),
+                        entity.getLastModifiedAt(),
+                        entity.getLastModifiedBy()
+                ))
+                .build();
+    }
+
+    public ItemEntity toEntity(Item domain) {
+        UomConversionProfile profile = domain.getUomConversionProfile();
+        return ItemEntity.builder()
+                .id(domain.getId())
+                .name(domain.getName())
+                .skuCode(domain.getSku().value())
+                .barcode(domain.getBarcode().value())
+                .baseUom(domain.getBaseUom().symbol())
+                .itemCategory(domain.getItemCategory().name())
+                .temperatureZone(domain.getTemperatureZone().name())
+                .requiresExpiry(domain.isRequiresExpiry())
+                .safetyStock(domain.getSafetyStock())
+                .active(domain.isActive())
+                .eaToGram(profile.findFactorFor(Uom.of("g")).orElse(null))
+                .eaToMl(profile.findFactorFor(Uom.of("ml")).orElse(null))
+                .eaToBox(profile.findFactorFor(Uom.of("box")).orElse(null))
+                .eaToPlt(profile.findFactorFor(Uom.of("plt")).orElse(null))
+                .createdAt(domain.getAuditInfo().createdAt())
+                .createdBy(domain.getAuditInfo().createdBy())
+                .lastModifiedAt(domain.getAuditInfo().lastModifiedAt())
+                .lastModifiedBy(domain.getAuditInfo().lastModifiedBy())
+                .build();
+    }
+
+    private UomConversionProfile mapUomConversionProfile(ItemEntity entity) {
+        Set<UomConversionFactor> factors = new HashSet<>();
+        if (entity.getEaToGram() != null) factors.add(new UomConversionFactor(Uom.of("g"), entity.getEaToGram()));
+        if (entity.getEaToMl() != null) factors.add(new UomConversionFactor(Uom.of("ml"), entity.getEaToMl()));
+        if (entity.getEaToBox() != null) factors.add(new UomConversionFactor(Uom.of("box"), entity.getEaToBox()));
+        if (entity.getEaToPlt() != null) factors.add(new UomConversionFactor(Uom.of("plt"), entity.getEaToPlt()));
+        return new UomConversionProfile(factors);
+    }
+}

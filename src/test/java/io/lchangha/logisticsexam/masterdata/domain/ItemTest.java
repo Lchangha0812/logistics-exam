@@ -1,6 +1,8 @@
 package io.lchangha.logisticsexam.masterdata.domain;
 
-import io.lchangha.logisticsexam.masterdata.domain.vo.*;
+import io.lchangha.logisticsexam.masterdata.item.domain.Item;
+import io.lchangha.logisticsexam.masterdata.item.domain.vo.*;
+import io.lchangha.logisticsexam.masterdata.vo.TemperatureZone;
 import io.lchangha.logisticsexam.shared.domain.AuditInfo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collections;
-import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,7 +45,7 @@ class ItemTest {
     void Item을_성공적으로_생성한다() {
         // given
         Uom baseUom = EA;
-        UomConversionProfile profile = new UomConversionProfile(Collections.emptyMap());
+        UomConversionProfile profile = new UomConversionProfile(Collections.emptySet());
 
         // when
         Item item = createTestItem(baseUom, profile);
@@ -58,7 +60,7 @@ class ItemTest {
     void 생성자에_null_이름을_전달하면_예외가_발생한다() {
         // given
         Uom baseUom = EA;
-        UomConversionProfile profile = new UomConversionProfile(Collections.emptyMap());
+        UomConversionProfile profile = new UomConversionProfile(Collections.emptySet());
 
         // when & then
         assertThatThrownBy(() -> Item.builder()
@@ -83,7 +85,7 @@ class ItemTest {
     void 생성자에_null_SKU를_전달하면_예외가_발생한다() {
         // given
         Uom baseUom = EA;
-        UomConversionProfile profile = new UomConversionProfile(Collections.emptyMap());
+        UomConversionProfile profile = new UomConversionProfile(Collections.emptySet());
 
         // when & then
         assertThatThrownBy(() -> Item.builder()
@@ -107,7 +109,7 @@ class ItemTest {
     @Test
     void 생성자에_null_baseUom을_전달하면_예외가_발생한다() {
         // given
-        UomConversionProfile profile = new UomConversionProfile(Collections.emptyMap());
+        UomConversionProfile profile = new UomConversionProfile(Collections.emptySet());
 
         // when & then
         assertThatThrownBy(() -> Item.builder()
@@ -155,7 +157,7 @@ class ItemTest {
     @Test
     void convert_동일한_단위로_변환_시_동일_객체를_반환한다() {
         // given
-        Item item = createTestItem(kg, new UomConversionProfile(Collections.emptyMap()));
+        Item item = createTestItem(kg, new UomConversionProfile(Collections.emptySet()));
         Measurement measurement = new Measurement(BigDecimal.TEN, kg);
 
         // when
@@ -168,7 +170,7 @@ class ItemTest {
     @Test
     void convert_동일_타입_내_보편적_단위로_성공적으로_변환한다() {
         // given
-        Item item = createTestItem(kg, new UomConversionProfile(Collections.emptyMap()));
+        Item item = createTestItem(kg, new UomConversionProfile(Collections.emptySet()));
         Measurement measurement = new Measurement(new BigDecimal("1.5"), kg); // 1.5 kg
 
         // when
@@ -183,8 +185,8 @@ class ItemTest {
     void convert_COUNT_타입_단위로_아이템별_변환을_성공적으로_수행한다() {
         // given
         // baseUom: EA, 1 BOX = 12 EA
-        UomConversionProfile profile = new UomConversionProfile(Map.of(
-                BOX, new BigDecimal("12") // 1 BOX = 12 EA
+        UomConversionProfile profile = new UomConversionProfile(Set.of(
+                new UomConversionFactor(BOX, new BigDecimal("12")) // 1 BOX = 12 EA
         ));
         Item item = createTestItem(EA, profile);
         Measurement measurement = new Measurement(new BigDecimal("2"), BOX); // 2 BOX
@@ -201,9 +203,9 @@ class ItemTest {
     void convert_다른_타입_단위로_아이템별_변환을_성공적으로_수행한다() {
         // given
         // baseUom: EA, 1 L = 1 EA, 1 KG = 0.92 EA (즉, 1 EA = 1.0869565 KG)
-        UomConversionProfile profile = new UomConversionProfile(Map.of(
-                L, BigDecimal.ONE, // 1 L = 1 EA
-                kg, new BigDecimal("0.92") // 1 KG = 0.92 EA
+        UomConversionProfile profile = new UomConversionProfile(Set.of(
+                new UomConversionFactor(L, BigDecimal.ONE), // 1 L = 1 EA
+                new UomConversionFactor(kg, new BigDecimal("0.92")) // 1 KG = 0.92 EA
         ));
         Item item = createTestItem(EA, profile);
         Measurement measurement = new Measurement(new BigDecimal("10"), L); // 10 L
@@ -224,8 +226,8 @@ class ItemTest {
     void convert_변환_비율이_없는_경우_예외가_발생한다() {
         // given
         // baseUom: EA, profile에 L에 대한 정보만 있음
-        UomConversionProfile profile = new UomConversionProfile(Map.of(
-                L, BigDecimal.ONE
+        UomConversionProfile profile = new UomConversionProfile(Set.of(
+                new UomConversionFactor(L, BigDecimal.ONE)
         ));
         Item item = createTestItem(EA, profile);
         Measurement measurement = new Measurement(new BigDecimal("10"), L);
@@ -240,7 +242,7 @@ class ItemTest {
     @Test
     void convert_null_measurement_전달_시_예외가_발생한다() {
         // given
-        Item item = createTestItem(EA, new UomConversionProfile(Collections.emptyMap()));
+        Item item = createTestItem(EA, new UomConversionProfile(Collections.emptySet()));
 
         // when & then
         assertThatThrownBy(() -> item.convert(null, kg))
@@ -251,7 +253,7 @@ class ItemTest {
     @Test
     void convert_null_targetUom_전달_시_예외가_발생한다() {
         // given
-        Item item = createTestItem(EA, new UomConversionProfile(Collections.emptyMap()));
+        Item item = createTestItem(EA, new UomConversionProfile(Collections.emptySet()));
         Measurement measurement = new Measurement(BigDecimal.TEN, EA);
 
         // when & then
