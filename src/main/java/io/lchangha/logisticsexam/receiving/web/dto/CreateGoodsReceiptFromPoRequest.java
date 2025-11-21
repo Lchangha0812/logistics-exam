@@ -1,19 +1,12 @@
 package io.lchangha.logisticsexam.receiving.web.dto;
 
-import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
+@Schema(description = "PO 기반 입고 생성 요청")
 public record CreateGoodsReceiptFromPoRequest(
-        String grnNumber,
-        @NotNull Long poId,
-        @NotNull Long supplierId,
-        @NotNull LocalDateTime receivedAt,
-        @Valid List<PoReceiptLineRequest> lines
+        @Schema(description = "발주(PO) ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+        @NotNull Long poId
 ) {
-    public CreateGoodsReceiptFromPoRequest {
-        lines = lines == null ? List.of() : List.copyOf(lines);
-    }
 }
+

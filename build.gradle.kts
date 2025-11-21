@@ -26,6 +26,7 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
@@ -42,6 +43,7 @@ dependencies {
     annotationProcessor("jakarta.persistence:jakarta.persistence-api")
     annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    runtimeOnly("org.postgresql:postgresql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -49,8 +51,6 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-// 자바 컴파일 시 MapStruct 어노테이션 프로세서에 옵션을 전달합니다.
-// 'defaultComponentModel'을 'spring'으로 설정하여 생성되는 매퍼 구현체에 @Component 어노테이션을 추가합니다.
 tasks.withType<JavaCompile> {
     options.compilerArgs.add("-Amapstruct.defaultComponentModel=spring")
 }

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/receiving/grns")
 @RequiredArgsConstructor
 public class GoodsReceiptController {
-    private static final String CURRENT_USER = "system";
 
     private final GoodsReceiptCreationService goodsReceiptCreationService;
     private final GoodsReceiptLineService goodsReceiptLineService;
@@ -27,13 +26,13 @@ public class GoodsReceiptController {
     @PostMapping("/po")
     @ResponseStatus(HttpStatus.CREATED)
     public CreateGoodsReceiptResponse createFromPo(@Valid @RequestBody CreateGoodsReceiptFromPoRequest request) {
-        return goodsReceiptCreationService.createGoodsReceiptFromPo(request, CURRENT_USER);
+        return goodsReceiptCreationService.createGoodsReceiptFromPo(request, "");
     }
 
     @PostMapping("/free")
     @ResponseStatus(HttpStatus.CREATED)
     public CreateGoodsReceiptResponse createFree(@Valid @RequestBody CreateFreeGoodsReceiptRequest request) {
-        return goodsReceiptCreationService.createFreeGoodsReceipt(request, CURRENT_USER);
+        return goodsReceiptCreationService.createFreeGoodsReceipt(request, "");
     }
 
     @GetMapping("/{grnId}")
