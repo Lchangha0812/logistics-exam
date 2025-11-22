@@ -1,10 +1,9 @@
 package io.lchangha.logisticsexam.masterdata.location.infra;
 
-import io.lchangha.logisticsexam.masterdata.location.domain.Location;
 import io.lchangha.logisticsexam.masterdata.item.domain.vo.ItemCategory;
-import io.lchangha.logisticsexam.masterdata.vo.TemperatureZone;
+import io.lchangha.logisticsexam.masterdata.location.domain.Location;
 import io.lchangha.logisticsexam.masterdata.location.infra.entity.LocationEntity;
-import io.lchangha.logisticsexam.shared.domain.AuditInfo;
+import io.lchangha.logisticsexam.masterdata.vo.TemperatureZone;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -17,12 +16,6 @@ public class LocationEntityMapper {
     private static final String CATEGORY_DELIMITER = ",";
 
     public Location toDomain(LocationEntity entity) {
-        AuditInfo auditInfo = new AuditInfo(
-                entity.getCreatedAt(),
-                entity.getCreatedBy(),
-                entity.getLastModifiedAt(),
-                entity.getLastModifiedBy()
-        );
 
         return Location.builder()
                 .id(entity.getId())
@@ -33,7 +26,6 @@ public class LocationEntityMapper {
                 .active(entity.isActive())
                 .allowedTemperatureZone(TemperatureZone.valueOf(entity.getAllowedTemperatureZone().toUpperCase()))
                 .allowedCategories(mapToItemCategoryList(entity.getAllowedCategories()))
-                .auditInfo(auditInfo)
                 .build();
     }
 
@@ -47,10 +39,6 @@ public class LocationEntityMapper {
                 .active(domain.isActive())
                 .allowedTemperatureZone(domain.getAllowedTemperatureZone().name())
                 .allowedCategories(mapToString(domain.getAllowedCategories()))
-                .createdAt(domain.getAuditInfo().createdAt())
-                .createdBy(domain.getAuditInfo().createdBy())
-                .lastModifiedAt(domain.getAuditInfo().lastModifiedAt())
-                .lastModifiedBy(domain.getAuditInfo().lastModifiedBy())
                 .build();
     }
 

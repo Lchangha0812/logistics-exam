@@ -41,4 +41,9 @@ public class ItemRepositoryImpl implements ItemRepository {
         List<Item> list = pages.getContent().stream().map(mapper::toDomain).toList();
         return new PageResult<>(list, page, size, pages.getTotalElements(), pages.getTotalPages(), pages.hasNext());
     }
+
+    @Override
+    public Optional<Item> findBySku(String sku) {
+        return Optional.empty();
+    }
 }

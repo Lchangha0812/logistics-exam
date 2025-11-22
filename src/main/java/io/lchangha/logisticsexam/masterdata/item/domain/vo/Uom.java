@@ -69,10 +69,13 @@ public record Uom(String symbol, Type type) {
      * @return Uom 객체
      */
     public static Uom of(String symbol) {
-        // Type을 추론하고, 모든 검증은 생성자에게 위임합니다.
         Type determinedType = SYMBOL_TO_TYPE_MAP.get(
                 symbol == null ? "" : symbol.toUpperCase()
         );
         return new Uom(symbol, determinedType);
+    }
+
+    public static Uom defaultUom() {
+        return Uom.of("EA");
     }
 }

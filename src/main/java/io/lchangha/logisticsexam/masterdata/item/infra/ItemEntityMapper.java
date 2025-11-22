@@ -1,10 +1,9 @@
 package io.lchangha.logisticsexam.masterdata.item.infra;
 
 import io.lchangha.logisticsexam.masterdata.item.domain.Item;
-import io.lchangha.logisticsexam.masterdata.item.infra.entity.ItemEntity;
 import io.lchangha.logisticsexam.masterdata.item.domain.vo.*;
+import io.lchangha.logisticsexam.masterdata.item.infra.entity.ItemEntity;
 import io.lchangha.logisticsexam.masterdata.vo.TemperatureZone;
-import io.lchangha.logisticsexam.shared.domain.AuditInfo;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -18,7 +17,6 @@ public class ItemEntityMapper {
                 .id(entity.getId())
                 .name(entity.getName())
                 .sku(new SKU(entity.getSkuCode()))
-                .barcode(new Barcode(entity.getBarcode()))
                 .baseUom(Uom.of(entity.getBaseUom()))
                 .itemCategory(ItemCategory.valueOf(entity.getItemCategory().toUpperCase()))
                 .temperatureZone(TemperatureZone.valueOf(entity.getTemperatureZone().toUpperCase()))
@@ -26,12 +24,6 @@ public class ItemEntityMapper {
                 .safetyStock(entity.getSafetyStock())
                 .active(entity.isActive())
                 .uomConversionProfile(mapUomConversionProfile(entity))
-                .auditInfo(new AuditInfo(
-                        entity.getCreatedAt(),
-                        entity.getCreatedBy(),
-                        entity.getLastModifiedAt(),
-                        entity.getLastModifiedBy()
-                ))
                 .build();
     }
 
@@ -41,7 +33,6 @@ public class ItemEntityMapper {
                 .id(domain.getId())
                 .name(domain.getName())
                 .skuCode(domain.getSku().value())
-                .barcode(domain.getBarcode().value())
                 .baseUom(domain.getBaseUom().symbol())
                 .itemCategory(domain.getItemCategory().name())
                 .temperatureZone(domain.getTemperatureZone().name())
@@ -52,10 +43,6 @@ public class ItemEntityMapper {
                 .eaToMl(profile.findFactorFor(Uom.of("ml")).orElse(null))
                 .eaToBox(profile.findFactorFor(Uom.of("box")).orElse(null))
                 .eaToPlt(profile.findFactorFor(Uom.of("plt")).orElse(null))
-                .createdAt(domain.getAuditInfo().createdAt())
-                .createdBy(domain.getAuditInfo().createdBy())
-                .lastModifiedAt(domain.getAuditInfo().lastModifiedAt())
-                .lastModifiedBy(domain.getAuditInfo().lastModifiedBy())
                 .build();
     }
 

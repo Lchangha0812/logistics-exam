@@ -2,7 +2,6 @@ package io.lchangha.logisticsexam.masterdata.supplier.infra;
 
 import io.lchangha.logisticsexam.masterdata.supplier.domain.Supplier;
 import io.lchangha.logisticsexam.masterdata.supplier.infra.entity.SupplierEntity;
-import io.lchangha.logisticsexam.shared.domain.AuditInfo;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,12 +19,6 @@ public class SupplierEntityMapper {
                 .contactPersonName(entity.getContactPersonName())
                 .businessRegistrationNumber(entity.getBusinessRegistrationNumber())
                 .paymentTerms(entity.getPaymentTerms())
-                .auditInfo(new AuditInfo(
-                        entity.getCreatedAt(),
-                        entity.getCreatedBy(),
-                        entity.getLastModifiedAt(),
-                        entity.getLastModifiedBy()
-                ))
                 .build();
     }
 
@@ -41,10 +34,6 @@ public class SupplierEntityMapper {
                 .contactPersonName(domain.getContactPersonName())
                 .businessRegistrationNumber(domain.getBusinessRegistrationNumber())
                 .paymentTerms(domain.getPaymentTerms())
-                .createdAt(domain.getAuditInfo().createdAt())
-                .createdBy(domain.getAuditInfo().createdBy())
-                .lastModifiedAt(domain.getAuditInfo().lastModifiedAt())
-                .lastModifiedBy(domain.getAuditInfo().lastModifiedBy())
                 .build();
     }
 }

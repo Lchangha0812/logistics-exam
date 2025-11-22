@@ -3,7 +3,6 @@ package io.lchangha.logisticsexam.receiving.domain.command;
 import io.lchangha.logisticsexam.receiving.domain.GoodsReceiptLine;
 import io.lchangha.logisticsexam.receiving.domain.PoTolerancePolicy;
 import io.lchangha.logisticsexam.receiving.domain.vo.GoodsReceiptNumber;
-import io.lchangha.logisticsexam.shared.domain.AuditInfo;
 import lombok.Builder;
 import org.springframework.util.Assert;
 
@@ -17,7 +16,6 @@ public record GoodsReceiptCreateFromPoParams(
         Long supplierId,
         Long poId,
         LocalDateTime receivedAt,
-        AuditInfo auditInfo,
         PoTolerancePolicy tolerancePolicy,
         List<GoodsReceiptLine> initialLines
 ) {
@@ -27,6 +25,5 @@ public record GoodsReceiptCreateFromPoParams(
         Assert.notNull(supplierId, "공급사 ID가 null일 수 없습니다.");
         Assert.notNull(poId, "PO ID가 null일 수 없습니다.");
         Assert.notNull(receivedAt, "입고 일시가 null일 수 없습니다.");
-        Assert.notNull(auditInfo, "감사 정보가 null일 수 없습니다.");
     }
 }

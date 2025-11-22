@@ -2,11 +2,9 @@ package io.lchangha.logisticsexam.masterdata.location.domain;
 
 import io.lchangha.logisticsexam.masterdata.item.domain.vo.ItemCategory;
 import io.lchangha.logisticsexam.masterdata.vo.TemperatureZone;
-import io.lchangha.logisticsexam.shared.domain.AuditInfo;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.util.Assert;
-
 
 import java.util.Collections;
 import java.util.List;
@@ -21,12 +19,11 @@ public class Location {
     private Type type;
     private Long parentId;
     private boolean active; // 나중에 enum
-    private AuditInfo auditInfo;
     private TemperatureZone allowedTemperatureZone;
     private List<ItemCategory> allowedCategories;
 
     @Builder
-    private Location(Long id, String code, String name, Type type, Long parentId, boolean active, AuditInfo auditInfo,
+    private Location(Long id, String code, String name, Type type, Long parentId, boolean active,
                      TemperatureZone allowedTemperatureZone, List<ItemCategory> allowedCategories) {
         Assert.hasText(code, "로케이션 코드는 비어 있을 수 없습니다.");
         Assert.hasText(name, "로케이션 이름은 비어 있을 수 없습니다.");
@@ -38,7 +35,6 @@ public class Location {
         this.type = type;
         this.parentId = parentId;
         this.active = active;
-        this.auditInfo = auditInfo;
         this.allowedTemperatureZone = allowedTemperatureZone;
         this.allowedCategories = Collections.unmodifiableList(allowedCategories);
     }

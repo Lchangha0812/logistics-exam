@@ -1,12 +1,7 @@
 package io.lchangha.logisticsexam.receiving.domain;
 
-import io.lchangha.logisticsexam.receiving.domain.command.GoodsReceiptCreateFreeParams;
-import io.lchangha.logisticsexam.receiving.domain.command.GoodsReceiptCreateFromPoParams;
-import io.lchangha.logisticsexam.receiving.domain.command.GoodsReceiptLineFreeLineParams;
-import io.lchangha.logisticsexam.receiving.domain.command.GoodsReceiptLinePoLineParams;
-import io.lchangha.logisticsexam.receiving.domain.command.GoodsReceiptScanParams;
+import io.lchangha.logisticsexam.receiving.domain.command.*;
 import io.lchangha.logisticsexam.receiving.domain.vo.*;
-import io.lchangha.logisticsexam.shared.domain.AuditInfo;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,7 +22,6 @@ public class GoodsReceipt {
     private GoodsReceiptStatus status;
     private Long supplierId;
     private Long poId;
-    private final AuditInfo auditInfo;
     private final List<GoodsReceiptLine> lines;
     private final PoTolerancePolicy tolerancePolicy;
     private final LocalDateTime receivedAt;
@@ -38,7 +32,6 @@ public class GoodsReceipt {
                          GoodsReceiptType type,
                          Long supplierId,
                          Long poId,
-                         AuditInfo auditInfo,
                          PoTolerancePolicy tolerancePolicy,
                          GoodsReceiptStatus status,
                          List<GoodsReceiptLine> lines,
@@ -47,7 +40,6 @@ public class GoodsReceipt {
         Assert.notNull(grnNumber, "GRN 번호가 null일 수 없습니다.");
         Assert.notNull(type, "GRN 유형이 null일 수 없습니다.");
         Assert.notNull(status, "GRN 상태가 null일 수 없습니다.");
-        Assert.notNull(auditInfo, "감사 정보가 null일 수 없습니다.");
         Assert.notNull(receivedAt, "입고 일시가 null일 수 없습니다.");
 
         this.id = id;
@@ -55,7 +47,6 @@ public class GoodsReceipt {
         this.type = type;
         this.supplierId = supplierId;
         this.poId = poId;
-        this.auditInfo = auditInfo;
         this.tolerancePolicy = tolerancePolicy;
         this.status = status;
         this.lines = lines == null ? new ArrayList<>() : new ArrayList<>(lines);
@@ -68,11 +59,10 @@ public class GoodsReceipt {
                                             GoodsReceiptStatus status,
                                             Long supplierId,
                                             Long poId,
-                                            AuditInfo auditInfo,
                                             List<GoodsReceiptLine> lines,
                                             PoTolerancePolicy tolerancePolicy,
                                             LocalDateTime receivedAt) {
-        return new GoodsReceipt(id, grnNumber, type, supplierId, poId, auditInfo, tolerancePolicy, status, lines, receivedAt);
+        return new GoodsReceipt(id, grnNumber, type, supplierId, poId, tolerancePolicy, status, lines, receivedAt);
     }
 
     public static GoodsReceipt createFromPo(GoodsReceiptCreateFromPoParams params) {
@@ -84,7 +74,6 @@ public class GoodsReceipt {
                 .status(GoodsReceiptStatus.DRAFT)
                 .supplierId(params.supplierId())
                 .poId(params.poId())
-                .auditInfo(params.auditInfo())
                 .tolerancePolicy(params.tolerancePolicy())
                 .lines(params.initialLines())
                 .receivedAt(params.receivedAt())
@@ -99,7 +88,6 @@ public class GoodsReceipt {
                 .type(GoodsReceiptType.FREE)
                 .status(GoodsReceiptStatus.DRAFT)
                 .supplierId(params.supplierId())
-                .auditInfo(params.auditInfo())
                 .lines(params.initialLines())
                 .receivedAt(params.receivedAt())
                 .build();

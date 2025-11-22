@@ -7,7 +7,6 @@ import io.lchangha.logisticsexam.masterdata.item.web.dto.ItemResponse;
 import io.lchangha.logisticsexam.masterdata.item.web.dto.UomConversionProfileRequest;
 import io.lchangha.logisticsexam.masterdata.item.web.dto.UpdateItemRequest;
 import io.lchangha.logisticsexam.masterdata.vo.TemperatureZone;
-import io.lchangha.logisticsexam.shared.domain.AuditInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -21,12 +20,7 @@ import java.util.stream.Collectors;
 public interface ItemDtoMapper {
 
     @Mappings({
-            @Mapping(source = "auditInfo.createdAt", target = "createdAt"),
-            @Mapping(source = "auditInfo.createdBy", target = "createdBy"),
-            @Mapping(source = "auditInfo.lastModifiedAt", target = "lastModifiedAt"),
-            @Mapping(source = "auditInfo.lastModifiedBy", target = "lastModifiedBy"),
             @Mapping(source = "sku.value", target = "skuCode"),
-            @Mapping(source = "barcode.value", target = "barcode"),
             @Mapping(source = "baseUom.symbol", target = "baseUom"),
             @Mapping(source = "itemCategory", target = "itemCategory"),
             @Mapping(source = "temperatureZone", target = "temperatureZone"),
@@ -48,7 +42,6 @@ public interface ItemDtoMapper {
                 .id(newId)
                 .name(request.name())
                 .sku(new SKU(request.skuCode()))
-                .barcode(new Barcode(request.barcode()))
                 .baseUom(Uom.of(request.baseUom()))
                 .itemCategory(ItemCategory.valueOf(request.itemCategory().toUpperCase()))
                 .temperatureZone(TemperatureZone.valueOf(request.temperatureZone().toUpperCase()))
@@ -56,7 +49,6 @@ public interface ItemDtoMapper {
                 .safetyStock(request.safetyStock())
                 .active(request.active())
                 .uomConversionProfile(toUomConversionProfile(request.uomConversionProfile()))
-                .auditInfo(AuditInfo.forCreation(creator))
                 .build();
     }
 
@@ -65,7 +57,6 @@ public interface ItemDtoMapper {
                 .id(existingItem.getId())
                 .name(request.name())
                 .sku(new SKU(request.skuCode()))
-                .barcode(new Barcode(request.barcode()))
                 .baseUom(Uom.of(request.baseUom()))
                 .itemCategory(ItemCategory.valueOf(request.itemCategory().toUpperCase()))
                 .temperatureZone(TemperatureZone.valueOf(request.temperatureZone().toUpperCase()))
@@ -73,7 +64,6 @@ public interface ItemDtoMapper {
                 .safetyStock(request.safetyStock())
                 .active(request.active())
                 .uomConversionProfile(toUomConversionProfile(request.uomConversionProfile()))
-                .auditInfo(existingItem.getAuditInfo().forUpdate(updater))
                 .build();
     }
 

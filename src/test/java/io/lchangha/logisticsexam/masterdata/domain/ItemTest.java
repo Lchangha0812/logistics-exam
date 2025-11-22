@@ -3,7 +3,6 @@ package io.lchangha.logisticsexam.masterdata.domain;
 import io.lchangha.logisticsexam.masterdata.item.domain.Item;
 import io.lchangha.logisticsexam.masterdata.item.domain.vo.*;
 import io.lchangha.logisticsexam.masterdata.vo.TemperatureZone;
-import io.lchangha.logisticsexam.shared.domain.AuditInfo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +28,6 @@ class ItemTest {
                 .id(1L)
                 .name("Test Item")
                 .sku(new SKU("SKU001"))
-                .barcode(new Barcode("BAR001"))
                 .baseUom(baseUom)
                 .itemCategory(ItemCategory.PRODUCE)
                 .temperatureZone(TemperatureZone.AMBIENT)
@@ -37,7 +35,6 @@ class ItemTest {
                 .safetyStock(BigDecimal.TEN)
                 .active(true)
                 .uomConversionProfile(profile)
-                .auditInfo(AuditInfo.forCreation("system"))
                 .build();
     }
 
@@ -67,7 +64,6 @@ class ItemTest {
                 .id(1L)
                 .name(null)
                 .sku(new SKU("SKU001"))
-                .barcode(new Barcode("BAR001"))
                 .baseUom(baseUom)
                 .itemCategory(ItemCategory.PRODUCE)
                 .temperatureZone(TemperatureZone.AMBIENT)
@@ -75,7 +71,6 @@ class ItemTest {
                 .safetyStock(BigDecimal.TEN)
                 .active(true)
                 .uomConversionProfile(profile)
-                .auditInfo(AuditInfo.forCreation("system"))
                 .build())
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("아이템 이름은 비어 있을 수 없습니다.");
@@ -92,7 +87,6 @@ class ItemTest {
                 .id(1L)
                 .name("Test Item")
                 .sku(null)
-                .barcode(new Barcode("BAR001"))
                 .baseUom(baseUom)
                 .itemCategory(ItemCategory.PRODUCE)
                 .temperatureZone(TemperatureZone.AMBIENT)
@@ -100,7 +94,6 @@ class ItemTest {
                 .safetyStock(BigDecimal.TEN)
                 .active(true)
                 .uomConversionProfile(profile)
-                .auditInfo(AuditInfo.forCreation("system"))
                 .build())
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("아이템 SKU는 null일 수 없습니다.");
@@ -116,7 +109,6 @@ class ItemTest {
                 .id(1L)
                 .name("Test Item")
                 .sku(new SKU("SKU001"))
-                .barcode(new Barcode("BAR001"))
                 .baseUom(null)
                 .itemCategory(ItemCategory.PRODUCE)
                 .temperatureZone(TemperatureZone.AMBIENT)
@@ -124,7 +116,6 @@ class ItemTest {
                 .safetyStock(BigDecimal.TEN)
                 .active(true)
                 .uomConversionProfile(profile)
-                .auditInfo(AuditInfo.forCreation("system"))
                 .build())
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("아이템 기본 단위(baseUom)는 null일 수 없습니다.");
@@ -140,7 +131,6 @@ class ItemTest {
                 .id(1L)
                 .name("Test Item")
                 .sku(new SKU("SKU001"))
-                .barcode(new Barcode("BAR001"))
                 .baseUom(baseUom)
                 .itemCategory(ItemCategory.PRODUCE)
                 .temperatureZone(TemperatureZone.AMBIENT)
@@ -148,7 +138,6 @@ class ItemTest {
                 .safetyStock(BigDecimal.TEN)
                 .active(true)
                 .uomConversionProfile(null)
-                .auditInfo(AuditInfo.forCreation("system"))
                 .build())
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("아이템 단위 변환 프로필은 null일 수 없습니다.");
@@ -158,23 +147,23 @@ class ItemTest {
     void convert_동일한_단위로_변환_시_동일_객체를_반환한다() {
         // given
         Item item = createTestItem(kg, new UomConversionProfile(Collections.emptySet()));
-        Measurement measurement = new Measurement(BigDecimal.TEN, kg);
+        Quantity quantity = new Quantity(BigDecimal.TEN, kg);
 
         // when
-        Measurement converted = item.convert(measurement, kg);
+        Quantity converted = item.convert(quantity, kg);
 
         // then
-        assertThat(converted).isSameAs(measurement);
+        assertThat(converted).isSameAs(quantity);
     }
 
     @Test
     void convert_동일_타입_내_보편적_단위로_성공적으로_변환한다() {
         // given
         Item item = createTestItem(kg, new UomConversionProfile(Collections.emptySet()));
-        Measurement measurement = new Measurement(new BigDecimal("1.5"), kg); // 1.5 kg
+        Quantity quantity = new Quantity(new BigDecimal("1.5"), kg); // 1.5 kg
 
         // when
-        Measurement converted = item.convert(measurement, g); // to g
+        Quantity converted = item.convert(quantity, g); // to g
 
         // then
         assertThat(converted.value()).isEqualByComparingTo(new BigDecimal("1500.0"));
@@ -189,10 +178,10 @@ class ItemTest {
                 new UomConversionFactor(BOX, new BigDecimal("12")) // 1 BOX = 12 EA
         ));
         Item item = createTestItem(EA, profile);
-        Measurement measurement = new Measurement(new BigDecimal("2"), BOX); // 2 BOX
+        Quantity quantity = new Quantity(new BigDecimal("2"), BOX); // 2 BOX
 
         // when
-        Measurement converted = item.convert(measurement, EA); // to EA
+        Quantity converted = item.convert(quantity, EA); // to EA
 
         // then
         assertThat(converted.value()).isEqualByComparingTo(new BigDecimal("24"));
@@ -208,10 +197,10 @@ class ItemTest {
                 new UomConversionFactor(kg, new BigDecimal("0.92")) // 1 KG = 0.92 EA
         ));
         Item item = createTestItem(EA, profile);
-        Measurement measurement = new Measurement(new BigDecimal("10"), L); // 10 L
+        Quantity quantity = new Quantity(new BigDecimal("10"), L); // 10 L
 
         // when
-        Measurement converted = item.convert(measurement, kg); // to kg
+        Quantity converted = item.convert(quantity, kg); // to kg
 
         // then
         // 10 L -> 10 EA (1 L = 1 EA)
@@ -230,11 +219,11 @@ class ItemTest {
                 new UomConversionFactor(L, BigDecimal.ONE)
         ));
         Item item = createTestItem(EA, profile);
-        Measurement measurement = new Measurement(new BigDecimal("10"), L);
+        Quantity quantity = new Quantity(new BigDecimal("10"), L);
 
         // when & then
         // KG에 대한 비율이 없으므로 예외 발생
-        assertThatThrownBy(() -> item.convert(measurement, kg))
+        assertThatThrownBy(() -> item.convert(quantity, kg))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("'" + kg.symbol() + "' 단위에 대한 변환 비율을 찾을 수 없습니다.");
     }
@@ -254,10 +243,10 @@ class ItemTest {
     void convert_null_targetUom_전달_시_예외가_발생한다() {
         // given
         Item item = createTestItem(EA, new UomConversionProfile(Collections.emptySet()));
-        Measurement measurement = new Measurement(BigDecimal.TEN, EA);
+        Quantity quantity = new Quantity(BigDecimal.TEN, EA);
 
         // when & then
-        assertThatThrownBy(() -> item.convert(measurement, null))
+        assertThatThrownBy(() -> item.convert(quantity, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("목표 단위는 null일 수 없습니다.");
     }

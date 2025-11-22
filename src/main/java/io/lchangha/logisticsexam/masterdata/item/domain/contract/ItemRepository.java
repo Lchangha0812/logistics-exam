@@ -11,4 +11,6 @@ public interface ItemRepository {
     Optional<Item> findById(Long id);
 
     PageResult<Item> findPage(int page, int size);
+
+    Optional<Item> findBySku(String sku);
 }

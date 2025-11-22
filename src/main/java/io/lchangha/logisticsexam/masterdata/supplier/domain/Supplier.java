@@ -1,6 +1,5 @@
 package io.lchangha.logisticsexam.masterdata.supplier.domain;
 
-import io.lchangha.logisticsexam.shared.domain.AuditInfo;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.util.Assert;
@@ -19,21 +18,19 @@ public class Supplier {
     private String businessRegistrationNumber;
     private String paymentTerms;
 
-    private AuditInfo auditInfo;
 
 
 
     @Builder
     private Supplier(Long id, String name, Integer leadTimeDays, Status status,
                      String address, String phoneNumber, String email, String contactPersonName,
-                     String businessRegistrationNumber, String paymentTerms, AuditInfo auditInfo) {
+                     String businessRegistrationNumber, String paymentTerms) {
 
         Assert.hasText(name, "공급사 이름은 비어 있을 수 없습니다.");
         Assert.notNull(leadTimeDays, "리드 타임은 null일 수 없습니다.");
         Assert.isTrue(leadTimeDays >= 0, "리드 타임은 0보다 작을 수 없습니다.");
         Assert.notNull(status, "공급사 상태는 null일 수 없습니다.");
         Assert.hasText(businessRegistrationNumber, "사업자 등록 번호는 비어 있을 수 없습니다.");
-        Assert.notNull(auditInfo, "감사 정보는 null일 수 없습니다.");
 
         this.id = id;
         this.name = name;
@@ -45,7 +42,6 @@ public class Supplier {
         this.contactPersonName = contactPersonName;
         this.businessRegistrationNumber = businessRegistrationNumber;
         this.paymentTerms = paymentTerms;
-        this.auditInfo = auditInfo;
     }
 
     /**
